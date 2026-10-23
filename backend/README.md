@@ -62,7 +62,23 @@ docker build -t gridbricks-backend:phase1 .
 docker run --rm -p 8000:8000 --env-file .env gridbricks-backend:phase1
 ```
 
-The image runs as a non-root user and reserves writable `/app/data` for SQLite. Its default `DATABASE_PATH` is `/app/data/wind.db`; omit `DATABASE_PATH` from a container env file to retain that default, or set it to the same absolute path. Database initialization and analytics are deferred to later phases.
+The image runs as a non-root user and reserves writable `/app/data` for SQLite. Its default `DATABASE_PATH` is `/app/data/wind.db`; omit `DATABASE_PATH` from a container env file to retain that default, or set it to the same absolute path. The sync command below initializes the database explicitly; analytics remain later-phase work.
+
+## January data sync
+
+Run explicitly from `backend/`; FastAPI startup does not fetch data:
+
+```sh
+uv run python -m app.scripts.sync_january_2026
+```
+
+The command initializes the configured SQLite database and requests daily FUELHH WIND windows for January 2–February 1, plus daily WINDFOR publication windows for January 1–31. It preserves native half-hour actuals and all hourly forecast vintages. Re-running uses the existing unique keys for upserts.
+
+HTTP requests have 10-second connection and 30-second read timeouts. Transient HTTP 429/500/502/503/504 and timeout/network errors have at most three attempts, with 0.5- and 1-second retry delays. Other HTTP errors, malformed JSON and unexpected response shapes fail immediately.
+
+Invalid required rows are counted and logged; any rejection fails the run. Valid non-WIND rows are filtered. Empty arrays are valid: a successful sync records processed rows, not a guarantee of complete period coverage. Inspect the logged counts and `sync_runs` metadata.
+
+The pilot stages validated records in memory, then commits data and successful sync metadata in one transaction. Failed runs preserve existing dataset rows and record failure metadata separately, with zero committed row counts. Successful counts represent processed records, including upserts, rather than newly inserted rows. Actual aggregation, decision selection and analytics remain later-phase work.
 
 ---
 

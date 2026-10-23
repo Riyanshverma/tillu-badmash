@@ -166,7 +166,7 @@ Mark Phase 2 complete and stop.
 
 ---
 
-## [ ] Phase 3 — Elexon client and ingestion
+## [x] Phase 3 — Elexon client and ingestion
 
 ### Goal
 

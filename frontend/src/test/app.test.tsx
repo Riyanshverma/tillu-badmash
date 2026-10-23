@@ -55,7 +55,7 @@ describe("Phase 1: App Shell & Routing", () => {
       screen.getByText("Forecast Accuracy & Uncertainty")
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Phase 1 Foundation Ready — Accuracy View")
+      screen.getByText("Systematic Bias")
     ).toBeInTheDocument();
   });
 
