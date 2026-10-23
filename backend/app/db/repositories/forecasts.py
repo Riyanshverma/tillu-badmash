@@ -47,3 +47,22 @@ async def for_target(
         (utc_text(start_time),),
     )
     return [Forecast.model_validate(dict(row)) for row in rows]
+
+
+async def at_cutoff(
+    connection: aiosqlite.Connection, target_date: date, cutoff: datetime,
+) -> list[Forecast]:
+    rows = await connection.execute_fetchall(
+        """
+        SELECT * FROM (
+            SELECT f.*, ROW_NUMBER() OVER (
+                PARTITION BY start_time ORDER BY publish_time DESC
+            ) AS rn
+            FROM wind_forecasts_hourly f
+            WHERE target_date = ? AND publish_time <= ?
+        ) WHERE rn = 1
+        ORDER BY start_time
+        """,
+        (target_date.isoformat(), utc_text(cutoff)),
+    )
+    return [Forecast.model_validate(dict(row)) for row in rows]

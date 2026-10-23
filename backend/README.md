@@ -78,7 +78,18 @@ HTTP requests have 10-second connection and 30-second read timeouts. Transient H
 
 Invalid required rows are counted and logged; any rejection fails the run. Valid non-WIND rows are filtered. Empty arrays are valid: a successful sync records processed rows, not a guarantee of complete period coverage. Inspect the logged counts and `sync_runs` metadata.
 
-The pilot stages validated records in memory, then commits data and successful sync metadata in one transaction. Failed runs preserve existing dataset rows and record failure metadata separately, with zero committed row counts. Successful counts represent processed records, including upserts, rather than newly inserted rows. Actual aggregation, decision selection and analytics remain later-phase work.
+The pilot stages validated records in memory, then commits data and successful sync metadata in one transaction. Failed runs preserve existing dataset rows and record failure metadata separately, with zero committed row counts. Successful counts represent processed records, including upserts, rather than newly inserted rows. Temporal derivation is available through the internal helpers below; accuracy analytics remain later-phase work.
+
+## Temporal derivation
+
+Internal helpers in `app/services/decision_service.py` operate on an existing database connection:
+
+- `hourly_actuals(connection, target_date)` returns complete hourly means and explicit missing hour starts. Both H:00 and H:30 are required; zeros are valid. No derived table is stored.
+- `decision_forecasts(connection, decision_date)` builds the fixed 09:20 Europe/London cutoff and next-day delivery date, then selects the latest eligible publication independently per target. Later vintages remain stored but are not selected.
+
+Both results expose expected, available and missing hour counts. These are internal January-pilot results, not public API responses or accuracy metrics.
+
+The January 16 noon live FUELHH pair is 8781/8752 MW, yielding 8766.5 MW. The selected January 15 forecast remains 7779 MW published at 07:30Z. See `PHASE4_VERIFICATION.md` for the correction to earlier example values and live boundary checks. The 8600/8962 → 8781 arithmetic fixture remains in the unit tests.
 
 ---
 

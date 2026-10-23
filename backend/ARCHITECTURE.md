@@ -300,10 +300,10 @@ hourly_actual_mw =
 Example:
 
 ```text
-12:00 actual = 8600
-12:30 actual = 8962
+12:00 actual = 8781
+12:30 actual = 8752
 
-hourly actual = 8781 MW
+hourly actual = 8766.5 MW
 ```
 
 Never sum the values.

@@ -215,7 +215,7 @@ Mark Phase 3 complete and stop.
 
 ---
 
-## [ ] Phase 4 — Hourly actual aggregation + decision-time selection
+## [x] Phase 4 — Hourly actual aggregation + decision-time selection
 
 ### Goal
 

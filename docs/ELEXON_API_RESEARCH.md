@@ -8,6 +8,12 @@ The findings in this document are based on direct HTTP inspection of the Elexon 
 
 These observed behaviors are authoritative for implementation unless later live evidence contradicts them.
 
+### Phase 4 correction — 2026-10-23
+
+A narrow recheck of FUELHH for 2026-01-16 found 8781 MW at 12:00Z (settlement period 25, published 12:30Z) and 8752 MW at 12:30Z (period 26, published 13:00Z). The hourly actual is therefore `(8781 + 8752) / 2 = 8766.5 MW`. The earlier 8781 MW hourly example does not match this live pair; 8781 is the first half-hour value in the current response. This is an example-data correction, not a change to the averaging or error-sign rules. The original 8600/8962 → 8781 arithmetic case remains a synthetic unit-test fixture.
+
+The exact two raw records are retained in `backend/tests/fixtures/fuelhh-wind-2026-01-16-noon.json`. The 07:30Z forecast remains 7779 MW, so the illustrative signed difference becomes -987.5 MW. Public field names/types are unchanged; frontend schemas need no changes. Frontend fixtures were not modified.
+
 Base URL:
 
 ```text
@@ -417,11 +423,11 @@ Example:
 
 ```text
 forecast 12:00 = 7779 MW
-hourly actual 12:00 = 8781 MW
+hourly actual 12:00 = 8766.5 MW
 
 error =
-7779 - 8781
-= -1002 MW
+7779 - 8766.5
+= -987.5 MW
 ```
 
 Therefore:
@@ -476,7 +482,7 @@ Do not create a fake WINDFOR settlement period in the public domain model.
   "start_time": "2026-01-16T12:00:00Z",
   "target_date": "2026-01-16",
   "target_hour": 12,
-  "generation_mw": 8781.0,
+  "generation_mw": 8766.5,
   "source_periods": [25, 26]
 }
 ```

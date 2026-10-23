@@ -18,6 +18,8 @@ Frontend may format MW as GW for presentation.
 
 # Domain conventions
 
+Example-data correction (2026-10-23): the representative 2026-01-16T12:00:00Z hourly actual is 8766.5 MW, derived from FUELHH values 8781 and 8752. Earlier examples used 8781 as an hourly value. The signed example error is now -987.5 MW. Only example values changed; public fields/types and frontend Zod schemas are unchanged. Existing frontend mock fixtures remain illustrative and were not modified in Phase 4.
+
 ## Decision cutoff
 
 ```text
@@ -160,8 +162,8 @@ Example:
       "start_time": "2026-01-16T12:00:00Z",
       "hour": 12,
       "forecast_mw": 7779.0,
-      "actual_mw": 8781.0,
-      "error_mw": -1002.0
+      "actual_mw": 8766.5,
+      "error_mw": -987.5
     }
   ],
   "hour_of_day_error": [
@@ -207,9 +209,9 @@ Example:
       "start_time": "2026-01-16T12:00:00Z",
       "hour": 12,
       "forecast_mw": 7779.0,
-      "actual_mw": 8781.0,
-      "error_mw": -1002.0,
-      "absolute_error_mw": 1002.0
+      "actual_mw": 8766.5,
+      "error_mw": -987.5,
+      "absolute_error_mw": 987.5
     }
   ]
 }
@@ -233,7 +235,7 @@ Example:
   "hour": 12,
   "decision_date": "2026-01-15",
   "decision_cutoff": "2026-01-15T09:20:00Z",
-  "actual_mw": 8781.0,
+  "actual_mw": 8766.5,
   "selected_publish_time": "2026-01-15T07:30:00Z",
   "series": [
     {

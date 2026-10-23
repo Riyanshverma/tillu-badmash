@@ -218,12 +218,12 @@ hourly_actual_mw =
 Example:
 
 ```text
-12:00 actual = 8600 MW
-12:30 actual = 8962 MW
+12:00 actual = 8781 MW
+12:30 actual = 8752 MW
 
 hourly actual =
-(8600 + 8962) / 2
-= 8781 MW
+(8781 + 8752) / 2
+= 8766.5 MW
 ```
 
 Do not sum the two MW values.
@@ -322,12 +322,12 @@ Example:
 
 ```text
 forecast = 7779 MW
-actual = 8781 MW
+actual = 8766.5 MW
 
-error = -1002 MW
+error = -987.5 MW
 ```
 
-This means wind was under-forecast by 1002 MW.
+This means wind was under-forecast by 987.5 MW.
 
 Use this sign convention consistently in:
 
