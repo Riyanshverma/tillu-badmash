@@ -62,7 +62,7 @@ docker build -t gridbricks-backend:phase1 .
 docker run --rm -p 8000:8000 --env-file .env gridbricks-backend:phase1
 ```
 
-The image runs as a non-root user and reserves writable `/app/data` for SQLite. Its default `DATABASE_PATH` is `/app/data/wind.db`; omit `DATABASE_PATH` from a container env file to retain that default, or set it to the same absolute path. The sync command below initializes the database explicitly; analytics remain later-phase work.
+The image runs as a non-root user and reserves writable `/app/data` for SQLite. Its default `DATABASE_PATH` is `/app/data/wind.db`; omit `DATABASE_PATH` from a container env file to retain that default, or set it to the same absolute path. The sync command below initializes the database explicitly; analytical HTTP routes remain later-phase work.
 
 ## January data sync
 
@@ -78,7 +78,7 @@ HTTP requests have 10-second connection and 30-second read timeouts. Transient H
 
 Invalid required rows are counted and logged; any rejection fails the run. Valid non-WIND rows are filtered. Empty arrays are valid: a successful sync records processed rows, not a guarantee of complete period coverage. Inspect the logged counts and `sync_runs` metadata.
 
-The pilot stages validated records in memory, then commits data and successful sync metadata in one transaction. Failed runs preserve existing dataset rows and record failure metadata separately, with zero committed row counts. Successful counts represent processed records, including upserts, rather than newly inserted rows. Temporal derivation is available through the internal helpers below; accuracy analytics remain later-phase work.
+The pilot stages validated records in memory, then commits data and successful sync metadata in one transaction. Failed runs preserve existing dataset rows and record failure metadata separately, with zero committed row counts. Successful counts represent processed records, including upserts, rather than newly inserted rows. Ingestion remains separate from the temporal and analytical helpers below.
 
 ## Temporal derivation
 
@@ -90,6 +90,49 @@ Internal helpers in `app/services/decision_service.py` operate on an existing da
 Both results expose expected, available and missing hour counts. These are internal January-pilot results, not public API responses or accuracy metrics.
 
 The January 16 noon live FUELHH pair is 8781/8752 MW, yielding 8766.5 MW. The selected January 15 forecast remains 7779 MW published at 07:30Z. See `PHASE4_VERIFICATION.md` for the correction to earlier example values and live boundary checks. The 8600/8962 → 8781 arithmetic fixture remains in the unit tests.
+
+## Internal accuracy and uncertainty analytics
+
+`app/services/accuracy_service.py` reuses the temporal helpers:
+
+- `daily_comparison(connection, decision_date)` aligns complete hourly actuals with selected forecasts by timestamp, returning matched points, metrics and separate forecast/actual/matched completeness counts.
+- `january_accuracy(connection)` evaluates January 1–31 purchase decisions, including February 1 delivery. It calculates overall metrics from all matched rows and returns hour-of-day statistics and heatmap-ready point metadata.
+
+Comparison errors are forecast minus actual. The corrected noon anchor is 7779 − 8766.5 = -987.5 MW, with absolute error 987.5 and squared error 975156.25.
+
+Pure domain functions calculate MAE, RMSE, signed bias, WAPE, linear-method P90 and over/under percentages without rounding. Zero errors count as neither over nor under. Empty matches produce nullable metrics with matched_points 0; WAPE is None when total actual generation is zero. Invalid or overflowing numeric results fail rather than emit NaN/Infinity.
+
+`forecast_bands(selected_forecasts, hour_statistics)` in `app/domain/uncertainty.py` attaches each target hour's historical P90, with lower bound clipped to zero. An hour without history has unknown band values. These are retrospective January historical error bands, not confidence intervals.
+
+## Public API (Phase 6)
+
+Run `uv run uvicorn app.main:app --host 127.0.0.1 --port 8000` from backend/.
+The configured SQLite schema initializes on startup; loading data still requires
+the explicit January sync command. No Elexon request runs on startup or an API request.
+
+- `GET /api/v1/health`
+- `GET /api/v1/decisions/2026-01-15`
+- `GET /api/v1/accuracy`
+- `GET /api/v1/comparisons/2026-01-15`
+- `GET /api/v1/forecast-evolution?target_time=2026-01-16T12:00:00Z`
+
+`/docs` and `/openapi.json` describe the Pydantic response models in
+`app/models/api.py`. Thin routes call `app/services/api_service.py`, which assembles
+existing Phase 4/5 results. Each request uses a consistent SQLite read snapshot.
+See CONTRACTS.md for 404 missing-data and 422 invalid-input behavior. Partial
+comparisons retain explicit completeness; missing actuals are never zero-filled.
+WAPE is nonnegative, unbounded above, and nullable for a zero actual denominator.
+
+`tests/fixtures/api/` contains captured real HTTP responses; accuracy is an explicitly
+labelled summary rather than the full 744-row payload. To repeat live verification
+using a disposable database and localhost server:
+
+```sh
+PYTHONPATH=. uv run python tests/verify_phase6_http.py
+```
+
+This explicitly invoked verifier requires Elexon network access. The regular pytest
+suite uses temporary databases and controlled/captured fixtures without live access.
 
 ---
 

@@ -291,7 +291,7 @@ Mark Phase 4 complete and stop.
 
 ---
 
-## [ ] Phase 5 — Accuracy and uncertainty analytics
+## [x] Phase 5 — Accuracy and uncertainty analytics
 
 ### Goal
 
@@ -345,7 +345,7 @@ Mark Phase 5 complete and stop.
 
 ---
 
-## [ ] Phase 6 — Public API contracts
+## [x] Phase 6 — Public API contracts
 
 ### Goal
 

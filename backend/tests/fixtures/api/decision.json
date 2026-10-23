@@ -1,0 +1,239 @@
+{
+  "decision_date": "2026-01-15",
+  "delivery_date": "2026-01-16",
+  "decision_cutoff": "2026-01-15T09:20:00Z",
+  "market_timezone": "Europe/London",
+  "market_reference": "EPEX SPOT GB DAA 1 (60')",
+  "selected_forecast_publish_time": "2026-01-15T07:30:00Z",
+  "forecast_age_minutes": 110,
+  "completeness": {
+    "expected_hours": 24,
+    "forecast_hours": 24,
+    "missing_hours": 0
+  },
+  "summary": {
+    "average_forecast_mw": 7930.416666666667,
+    "peak_forecast_mw": 10375,
+    "peak_start_time": "2026-01-16T21:00:00Z",
+    "historical_mae_mw": 2038.9126344086021,
+    "historical_p90_abs_error_mw": 4097.9
+  },
+  "series": [
+    {
+      "start_time": "2026-01-16T00:00:00Z",
+      "hour": 0,
+      "forecast_mw": 7398,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3937,
+      "lower_mw": 3461,
+      "upper_mw": 11335
+    },
+    {
+      "start_time": "2026-01-16T01:00:00Z",
+      "hour": 1,
+      "forecast_mw": 7008,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4185,
+      "lower_mw": 2823,
+      "upper_mw": 11193
+    },
+    {
+      "start_time": "2026-01-16T02:00:00Z",
+      "hour": 2,
+      "forecast_mw": 6731,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4330.5,
+      "lower_mw": 2400.5,
+      "upper_mw": 11061.5
+    },
+    {
+      "start_time": "2026-01-16T03:00:00Z",
+      "hour": 3,
+      "forecast_mw": 6555,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4512,
+      "lower_mw": 2043,
+      "upper_mw": 11067
+    },
+    {
+      "start_time": "2026-01-16T04:00:00Z",
+      "hour": 4,
+      "forecast_mw": 6355,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4756,
+      "lower_mw": 1599,
+      "upper_mw": 11111
+    },
+    {
+      "start_time": "2026-01-16T05:00:00Z",
+      "hour": 5,
+      "forecast_mw": 6288,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4844,
+      "lower_mw": 1444,
+      "upper_mw": 11132
+    },
+    {
+      "start_time": "2026-01-16T06:00:00Z",
+      "hour": 6,
+      "forecast_mw": 6242,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4830.5,
+      "lower_mw": 1411.5,
+      "upper_mw": 11072.5
+    },
+    {
+      "start_time": "2026-01-16T07:00:00Z",
+      "hour": 7,
+      "forecast_mw": 6338,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4817,
+      "lower_mw": 1521,
+      "upper_mw": 11155
+    },
+    {
+      "start_time": "2026-01-16T08:00:00Z",
+      "hour": 8,
+      "forecast_mw": 6594,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3772,
+      "lower_mw": 2822,
+      "upper_mw": 10366
+    },
+    {
+      "start_time": "2026-01-16T09:00:00Z",
+      "hour": 9,
+      "forecast_mw": 7064,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3477.5,
+      "lower_mw": 3586.5,
+      "upper_mw": 10541.5
+    },
+    {
+      "start_time": "2026-01-16T10:00:00Z",
+      "hour": 10,
+      "forecast_mw": 7566,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3680.5,
+      "lower_mw": 3885.5,
+      "upper_mw": 11246.5
+    },
+    {
+      "start_time": "2026-01-16T11:00:00Z",
+      "hour": 11,
+      "forecast_mw": 7814,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3700,
+      "lower_mw": 4114,
+      "upper_mw": 11514
+    },
+    {
+      "start_time": "2026-01-16T12:00:00Z",
+      "hour": 12,
+      "forecast_mw": 7779,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3388,
+      "lower_mw": 4391,
+      "upper_mw": 11167
+    },
+    {
+      "start_time": "2026-01-16T13:00:00Z",
+      "hour": 13,
+      "forecast_mw": 7612,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3175,
+      "lower_mw": 4437,
+      "upper_mw": 10787
+    },
+    {
+      "start_time": "2026-01-16T14:00:00Z",
+      "hour": 14,
+      "forecast_mw": 7565,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3382.5,
+      "lower_mw": 4182.5,
+      "upper_mw": 10947.5
+    },
+    {
+      "start_time": "2026-01-16T15:00:00Z",
+      "hour": 15,
+      "forecast_mw": 7827,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3350.5,
+      "lower_mw": 4476.5,
+      "upper_mw": 11177.5
+    },
+    {
+      "start_time": "2026-01-16T16:00:00Z",
+      "hour": 16,
+      "forecast_mw": 8377,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4021,
+      "lower_mw": 4356,
+      "upper_mw": 12398
+    },
+    {
+      "start_time": "2026-01-16T17:00:00Z",
+      "hour": 17,
+      "forecast_mw": 8977,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3771.5,
+      "lower_mw": 5205.5,
+      "upper_mw": 12748.5
+    },
+    {
+      "start_time": "2026-01-16T18:00:00Z",
+      "hour": 18,
+      "forecast_mw": 9511,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3806.5,
+      "lower_mw": 5704.5,
+      "upper_mw": 13317.5
+    },
+    {
+      "start_time": "2026-01-16T19:00:00Z",
+      "hour": 19,
+      "forecast_mw": 9961,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3606,
+      "lower_mw": 6355,
+      "upper_mw": 13567
+    },
+    {
+      "start_time": "2026-01-16T20:00:00Z",
+      "hour": 20,
+      "forecast_mw": 10267,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3843,
+      "lower_mw": 6424,
+      "upper_mw": 14110
+    },
+    {
+      "start_time": "2026-01-16T21:00:00Z",
+      "hour": 21,
+      "forecast_mw": 10375,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 3716.5,
+      "lower_mw": 6658.5,
+      "upper_mw": 14091.5
+    },
+    {
+      "start_time": "2026-01-16T22:00:00Z",
+      "hour": 22,
+      "forecast_mw": 10207,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4322.5,
+      "lower_mw": 5884.5,
+      "upper_mw": 14529.5
+    },
+    {
+      "start_time": "2026-01-16T23:00:00Z",
+      "hour": 23,
+      "forecast_mw": 9919,
+      "publish_time": "2026-01-15T07:30:00Z",
+      "p90_abs_error_mw": 4145.5,
+      "lower_mw": 5773.5,
+      "upper_mw": 14064.5
+    }
+  ]
+}

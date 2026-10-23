@@ -451,6 +451,8 @@ wape_percent = None
 
 Never emit Infinity or NaN JSON values.
 
+Empty matched input returns matched_points 0 and nullable metrics. Exact-zero errors count in the denominator but count as neither over- nor under-forecast, so those percentages can sum to less than 100%. P90 uses NumPy `percentile(..., 90, method="linear")` without intermediate rounding. Nonfinite generation or unrepresentable numeric results fail clearly rather than entering analytical output.
+
 ---
 
 # Historical uncertainty
@@ -473,6 +475,8 @@ P90(
 ```
 
 Attach the matching hour-of-day P90 value to every Decision series point.
+
+Only hours with matched January history produce statistics. Missing hour history remains unknown (nullable internal band values), never a synthetic zero-width band. These are retrospective January historical-error statistics, not a calibrated probabilistic interval or a rolling as-of-decision estimate.
 
 Band:
 

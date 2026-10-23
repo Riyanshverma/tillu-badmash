@@ -28,7 +28,11 @@ async def test_health_matches_contract():
         response = await client.get("/api/v1/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
-    assert set(app.openapi()["paths"]) == {"/api/v1/health"}
+    assert set(app.openapi()["paths"]) == {
+        "/api/v1/health", "/api/v1/decisions/{decision_date}",
+        "/api/v1/accuracy", "/api/v1/comparisons/{decision_date}",
+        "/api/v1/forecast-evolution",
+    }
 
 
 @pytest.mark.asyncio

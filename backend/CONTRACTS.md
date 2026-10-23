@@ -12,6 +12,13 @@ All times are timezone-aware ISO-8601 strings.
 
 All generation/error values are returned in MW.
 
+All numeric outputs are finite. `metrics.wape_percent` is a nonnegative number
+without a 100% ceiling, or `null` when the matched actual denominator is zero.
+This reflects the verified Phase 5 formula; WAPE is not a bounded accuracy score.
+Other metrics are non-null on successful responses (zero matches return 404).
+The existing frontend `percentSchema` for WAPE must become
+`z.number().finite().nonnegative().nullable()` during frontend integration.
+
 Frontend may format MW as GW for presentation.
 
 ---
@@ -120,6 +127,14 @@ Notes:
 - `selected_forecast_publish_time` is the actual selected vintage timestamp, not a hard-coded display value
 - January live data normally selects the 07:30Z vintage
 - if data is incomplete, report that through `completeness`; never invent missing hours
+- with mixed per-target vintages, the headline publication is the latest selected
+  publication; each series item retains its own authoritative publication
+- `forecast_age_minutes` is the whole elapsed minutes since that headline
+  publication (floored); peak ties use the earliest target
+- historical summary statistics and hour-specific P90 bands describe all matched
+  January decisions, not a history restricted to before the purchase decision
+- missing history for any returned forecast hour returns 404 rather than a
+  fabricated band; missing forecast hours are omitted and counted
 
 ---
 
@@ -268,6 +283,38 @@ Example:
 
 Later vintages remain visible in this analytical endpoint but must be marked unavailable at decision time.
 
+`actual_mw` is nullable when either native half-hour is missing. Targets must be
+exact UTC hours with timezone-aware ISO-8601 input, normalized to UTC. Supported
+delivery dates are January 2 through February 1, inclusive. If vintages exist but
+none was eligible at the decision cutoff, return 404 rather than selecting later data.
+
+---
+
+# Error and incomplete-data behavior
+
+Invalid dates/timestamps, naive or off-hour targets and dates outside the supported
+pilot return 422 with FastAPI's standard `detail` validation response.
+
+Missing data returns 404 with `{"detail": "<message>"}`:
+
+| Condition | Message |
+| --- | --- |
+| Decision has no eligible hourly forecasts | No decision-time forecasts available |
+| Decision lacks historical errors for any returned hour | Historical error statistics unavailable |
+| Comparison/accuracy has no matched points | No matched hourly data available |
+| Evolution target has no vintages | No forecast vintages available for target |
+| Evolution target has no eligible decision-time forecast | No decision-time forecast available for target |
+
+Partial comparisons return only matched points with reduced completeness and metrics
+computed from those points. Partial accuracy returns only matched heatmap points and
+observed hour groups; `matched_points` and the fixed period reveal coverage. Neither
+endpoint fills gaps with zeros. Unexpected failures return 500 with
+`{"detail": "Internal server error"}`; details remain in server logs.
+
+Startup initializes the configured SQLite schema only. Requests read a consistent
+database snapshot; ingestion remains an explicit command, never an import/startup
+or request side effect.
+
 ---
 
 # Shared model concepts
@@ -340,3 +387,7 @@ When a public contract changes:
 6. run both test suites
 
 Never change only one side.
+
+Phase 6 exception authorized by the phase scope: the WAPE correction is recorded
+here, in backend models/tests and the Phase 6 frontend handoff. Frontend Zod and
+fixture changes are deferred to frontend integration; no frontend files are edited.
