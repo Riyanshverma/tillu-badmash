@@ -126,7 +126,7 @@ Mark Phase 1 complete and stop.
 
 ---
 
-## [ ] Phase 2 — Design system and static Decision view
+## [x] Phase 2 — Design system and static Decision view
 
 ### Goal
 

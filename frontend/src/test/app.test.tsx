@@ -36,7 +36,7 @@ describe("Phase 1: App Shell & Routing", () => {
     expect(screen.getByText("Accuracy")).toBeInTheDocument();
     expect(screen.getByText("Elexon data")).toBeInTheDocument();
     expect(
-      screen.getByText("Phase 1 Foundation Ready — Decision View")
+      screen.getByText("Day-Ahead Wind Decision")
     ).toBeInTheDocument();
   });
 

@@ -1,27 +1,26 @@
+import { useState } from "react";
+import { mockDecisionResponse } from "../test/fixtures";
+import { formatLondonTime } from "../lib/dates";
+import { DecisionHeader } from "../components/decision/decision-header";
+import { DecisionContext } from "../components/decision/decision-context";
+import { DecisionMetrics } from "../components/decision/decision-metrics";
+import { ForecastProfileChart } from "../components/charts/forecast-profile-chart";
+import { DecisionMethodology } from "../components/decision/decision-methodology";
+
 export function DecisionPage() {
+  // Static fixture data for Phase 2; API fetching wired in Phase 4
+  const [decision] = useState(mockDecisionResponse);
+
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-200 pb-5">
-        <h1 className="text-[28px] font-[650] tracking-[-0.02em] text-slate-900 leading-tight">
-          Day-Ahead Wind Decision
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          EPEX SPOT GB DAA 1 (60&apos;) · Fixed decision cutoff at 09:20 Europe/London
-        </p>
-      </div>
-
-      <div className="bg-white border border-slate-200 rounded-[12px] p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-        <div className="flex items-center gap-3 text-slate-700">
-          <div className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse" />
-          <span className="text-sm font-semibold">
-            Phase 1 Foundation Ready — Decision View
-          </span>
-        </div>
-        <p className="mt-2 text-sm text-slate-500 leading-relaxed">
-          Foundation shell and verified contracts are locked. The 24-point hourly forecast profile,
-          historical P90 error band, and decision metrics will be mounted in Phase 2.
-        </p>
-      </div>
+      <DecisionHeader selectedDate={decision.decision_date} />
+      <DecisionContext decision={decision} />
+      <DecisionMetrics summary={decision.summary} />
+      <ForecastProfileChart
+        series={decision.series}
+        selectedPublishTime={formatLondonTime(decision.selected_forecast_publish_time)}
+      />
+      <DecisionMethodology />
     </div>
   );
 }

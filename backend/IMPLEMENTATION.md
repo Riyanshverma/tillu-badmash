@@ -122,7 +122,7 @@ Mark Phase 1 complete and stop.
 
 ---
 
-## [ ] Phase 2 — SQLite schema and repositories
+## [x] Phase 2 — SQLite schema and repositories
 
 ### Goal
 
