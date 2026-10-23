@@ -58,3 +58,32 @@ export const mockEvolutionResponse: ForecastEvolutionResponse = {
     },
   ],
 };
+
+export const mockEvolutionHour17Response: ForecastEvolutionResponse = {
+  target_time: "2026-01-30T17:00:00Z",
+  hour: 17,
+  decision_date: "2026-01-29",
+  decision_cutoff: "2026-01-29T09:20:00Z",
+  actual_mw: 16351.5,
+  selected_publish_time: "2026-01-29T07:30:00Z",
+  series: [
+    {
+      publish_time: "2026-01-29T04:30:00Z",
+      forecast_mw: 16790.0,
+      is_available_at_decision: true,
+      is_selected_at_decision: false,
+    },
+    {
+      publish_time: "2026-01-29T07:30:00Z",
+      forecast_mw: 16883.0,
+      is_available_at_decision: true,
+      is_selected_at_decision: true,
+    },
+    {
+      publish_time: "2026-01-29T09:30:00Z",
+      forecast_mw: 17366.0,
+      is_available_at_decision: false,
+      is_selected_at_decision: false,
+    },
+  ],
+};

@@ -10,13 +10,19 @@ import {
 } from "recharts";
 import type { ForecastEvolutionResponse } from "../../contracts";
 import { formatGw, formatMw } from "../../lib/format";
-import { formatLondonDate, formatLondonTime } from "../../lib/dates";
+import {
+  formatLondonDate,
+  formatLondonDateTime,
+  formatLondonShortDateTime,
+  formatLondonTime,
+} from "../../lib/dates";
 
 interface ForecastEvolutionChartProps {
   evolution: ForecastEvolutionResponse;
 }
 
 interface EvolutionRow {
+  timestamp: number;
   publishTimeRaw: string;
   publishTimeLabel: string;
   forecast_mw: number;
@@ -31,19 +37,32 @@ interface CustomTooltipProps {
   }>;
 }
 
+interface EvolutionTooltipProps extends CustomTooltipProps {
+  actualMw: number | null;
+  selectedPublishTime: string;
+  cutoffTime: string;
+}
+
 function EvolutionTooltip({
   active,
   payload,
   actualMw,
-}: CustomTooltipProps & { actualMw: number | null }) {
+  selectedPublishTime,
+  cutoffTime,
+}: EvolutionTooltipProps) {
   if (!active || !payload || !payload.length) return null;
   const data = payload[0].payload;
-  const diffToActual = actualMw !== null ? data.forecast_mw - actualMw : null;
+  const diffToActual =
+    actualMw !== null && actualMw !== undefined
+      ? data.forecast_mw - actualMw
+      : null;
+  const cutoffLabel = formatLondonTime(cutoffTime);
+  const selectedLabel = formatLondonTime(selectedPublishTime);
 
   return (
     <div className="bg-white border border-slate-200 rounded-[8px] p-3 shadow-md text-xs space-y-1.5 min-w-[230px] pointer-events-none">
       <div className="font-semibold text-slate-800 border-b border-slate-100 pb-1 flex items-center justify-between">
-        <span>Published {data.publishTimeLabel}</span>
+        <span>Published {formatLondonDateTime(data.publishTimeRaw)}</span>
         <span
           className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
             data.is_selected
@@ -71,7 +90,7 @@ function EvolutionTooltip({
         </span>
       </div>
 
-      {actualMw !== null && diffToActual !== null && (
+      {actualMw !== null && actualMw !== undefined && diffToActual !== null && (
         <div className="pt-1.5 border-t border-slate-100 flex items-center justify-between">
           <span className="text-slate-500">Variance to Actual:</span>
           <span
@@ -91,10 +110,10 @@ function EvolutionTooltip({
 
       <div className="text-[10px] text-slate-400 pt-1">
         {data.is_selected
-          ? "This vintage was locked at the 09:20 auction cutoff."
+          ? `This vintage was locked at the ${cutoffLabel} auction cutoff.`
           : data.is_available
-          ? "Published prior to gate closure, but superseded by 07:30 vintage."
-          : "Published after 09:20 cutoff; unavailable for auction bidding."}
+          ? `Published prior to gate closure, but superseded by ${selectedLabel} vintage.`
+          : `Published after ${cutoffLabel} cutoff; unavailable for auction bidding.`}
       </div>
     </div>
   );
@@ -104,24 +123,65 @@ export function ForecastEvolutionChart({
   evolution,
 }: ForecastEvolutionChartProps) {
   const chartData: EvolutionRow[] = evolution.series.map((v) => ({
+    timestamp: new Date(v.publish_time).getTime(),
     publishTimeRaw: v.publish_time,
-    publishTimeLabel: formatLondonTime(v.publish_time),
+    publishTimeLabel: formatLondonShortDateTime(v.publish_time),
     forecast_mw: v.forecast_mw,
     is_available: v.is_available_at_decision,
     is_selected: v.is_selected_at_decision,
   }));
 
   const targetDateStr = formatLondonDate(evolution.target_time);
+  const targetTimeLabel = formatLondonTime(evolution.target_time);
+  const cutoffTimeLabel = formatLondonTime(evolution.decision_cutoff);
+  const cutoffTimestamp = new Date(evolution.decision_cutoff).getTime();
+
+  // Find the selected series item (for dynamic forecast value)
+  const selectedItem = evolution.series.find((v) => v.is_selected_at_decision);
+  const selectedForecastMw = selectedItem ? selectedItem.forecast_mw : null;
+  const selectedPublishLabel = selectedItem
+    ? formatLondonTime(selectedItem.publish_time)
+    : formatLondonTime(evolution.selected_publish_time);
+
+  // Find first post-cutoff item to report exact latency/delay
+  const firstPostCutoff = evolution.series.find(
+    (v) => !v.is_available_at_decision
+  );
+  let postCutoffFooterText = "";
+  if (firstPostCutoff) {
+    const postMs = new Date(firstPostCutoff.publish_time).getTime();
+    const diffMins = Math.max(
+      0,
+      Math.round((postMs - cutoffTimestamp) / 60000)
+    );
+    postCutoffFooterText = ` · Next vintage (${formatLondonTime(
+      firstPostCutoff.publish_time
+    )}) is post-cutoff (+${diffMins}m)`;
+  }
+
+  // Domain computation: ensure all vintages and the cutoff marker are within the visible domain
+  const allTimestamps = chartData.map((d) => d.timestamp);
+  const minTs =
+    allTimestamps.length > 0
+      ? Math.min(...allTimestamps, cutoffTimestamp)
+      : cutoffTimestamp;
+  const maxTs =
+    allTimestamps.length > 0
+      ? Math.max(...allTimestamps, cutoffTimestamp)
+      : cutoffTimestamp;
+  const timeSpan = maxTs - minTs;
+  const timePadding = timeSpan > 0 ? timeSpan * 0.02 : 3600000;
 
   return (
     <div className="bg-white border border-slate-200 rounded-[12px] p-5 shadow-[0_1px_2px_rgba(15,23,42,0.04)] flex flex-col">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-slate-100">
         <div>
           <h2 className="text-base font-semibold text-slate-900 tracking-[-0.01em]">
-            Forecast Evolution for Target Hour (12:00 GMT)
+            Forecast Evolution for Target Hour ({targetTimeLabel})
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Target delivery: {targetDateStr} at 12:00 GMT · Progression of forecast vintages before and after 09:20 cutoff
+            Target delivery: {targetDateStr} at {targetTimeLabel} · Progression
+            of forecast vintages before and after {cutoffTimeLabel} cutoff
           </p>
         </div>
 
@@ -129,23 +189,32 @@ export function ForecastEvolutionChart({
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-blue-600 ring-2 ring-emerald-500" />
             <span className="text-slate-700 font-semibold">
-              Selected Vintage (07:30Z)
+              Selected Vintage ({selectedPublishLabel})
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-0.5 bg-slate-900 border border-dashed border-slate-900" />
             <span className="text-slate-700 font-medium">
-              Actual Outturn ({evolution.actual_mw ? formatMw(evolution.actual_mw, 0) : "—"})
+              Actual Outturn (
+              {evolution.actual_mw !== null && evolution.actual_mw !== undefined
+                ? formatMw(evolution.actual_mw, 0)
+                : "—"}
+              )
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-0.5 bg-amber-500 border border-dashed border-amber-500" />
-            <span className="text-slate-700 font-medium">09:20 Decision Cutoff</span>
+            <span className="text-slate-700 font-medium">
+              {cutoffTimeLabel} Decision Cutoff
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="w-full h-[300px] pt-4" data-testid="evolution-chart-container">
+      <div
+        className="w-full h-[300px] pt-4"
+        data-testid="evolution-chart-container"
+      >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
@@ -157,48 +226,54 @@ export function ForecastEvolutionChart({
               stroke="#E2E8F0"
             />
             <XAxis
-              dataKey="publishTimeLabel"
-              tick={{ fill: "#64748B", fontSize: 12 }}
+              type="number"
+              dataKey="timestamp"
+              domain={[minTs - timePadding, maxTs + timePadding]}
+              tickFormatter={(ts: number) => formatLondonShortDateTime(ts)}
+              tick={{ fill: "#64748B", fontSize: 11 }}
               stroke="#CBD5E1"
             />
             <YAxis
-              tickFormatter={(mw: number) =>
-                `${(mw / 1000).toFixed(1)} GW`
-              }
+              tickFormatter={(mw: number) => `${(mw / 1000).toFixed(1)} GW`}
               tick={{ fill: "#64748B", fontSize: 12 }}
               stroke="#CBD5E1"
               domain={["auto", "auto"]}
             />
             <Tooltip
               content={
-                <EvolutionTooltip actualMw={evolution.actual_mw} />
+                <EvolutionTooltip
+                  actualMw={evolution.actual_mw}
+                  selectedPublishTime={evolution.selected_publish_time}
+                  cutoffTime={evolution.decision_cutoff}
+                />
               }
             />
 
             {/* Actual Outturn reference line */}
-            {evolution.actual_mw !== null && (
-              <ReferenceLine
-                y={evolution.actual_mw}
-                stroke="#0F172A"
-                strokeWidth={1.5}
-                strokeDasharray="4 4"
-                label={{
-                  value: `Actual: ${formatGw(evolution.actual_mw, 2)}`,
-                  fill: "#0F172A",
-                  fontSize: 11,
-                  position: "right",
-                }}
-              />
-            )}
+            {evolution.actual_mw !== null &&
+              evolution.actual_mw !== undefined && (
+                <ReferenceLine
+                  y={evolution.actual_mw}
+                  stroke="#0F172A"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 4"
+                  label={{
+                    value: `Actual: ${formatGw(evolution.actual_mw, 2)}`,
+                    fill: "#0F172A",
+                    fontSize: 11,
+                    position: "right",
+                  }}
+                />
+              )}
 
-            {/* Cutoff Reference between 07:30 and 09:30 */}
+            {/* Decision Cutoff Reference at exact decision_cutoff timestamp */}
             <ReferenceLine
-              x="07:30 GMT"
+              x={cutoffTimestamp}
               stroke="#D97706"
               strokeWidth={1.5}
               strokeDasharray="4 4"
               label={{
-                value: "09:20 Cutoff (07:30 selected)",
+                value: `${cutoffTimeLabel} Cutoff`,
                 fill: "#B45309",
                 fontSize: 11,
                 position: "insideTopLeft",
@@ -255,11 +330,15 @@ export function ForecastEvolutionChart({
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+      <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-[11px] text-slate-400">
         <span>
-          Selected: 07:30 GMT vintage ({formatMw(7779, 0)}) · Next vintage (09:30 GMT) is post-cutoff (+10m)
+          Selected: {selectedPublishLabel} vintage (
+          {selectedForecastMw !== null ? formatMw(selectedForecastMw, 0) : "—"}
+          ){postCutoffFooterText}
         </span>
-        <span>Later vintages provided for retrospective volatility tracking only</span>
+        <span>
+          Later vintages provided for retrospective volatility tracking only
+        </span>
       </div>
     </div>
   );

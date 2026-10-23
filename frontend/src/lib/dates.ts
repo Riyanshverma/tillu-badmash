@@ -28,6 +28,15 @@ const londonTimeFormatter = new Intl.DateTimeFormat("en-GB", {
   hourCycle: "h23",
 });
 
+const londonShortDateTimeFormatter = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/London",
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
 /**
  * Format an ISO timestamp to "15 Jan 2026, 09:20 GMT" in Europe/London.
  */
@@ -53,6 +62,15 @@ export function formatLondonTime(isoString: string): string {
   const d = new Date(isoString);
   if (isNaN(d.getTime())) return "Invalid time";
   return `${londonTimeFormatter.format(d)} GMT`;
+}
+
+/**
+ * Format an ISO timestamp or epoch milliseconds to "15 Jan, 09:20" in Europe/London.
+ */
+export function formatLondonShortDateTime(val: string | number): string {
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return "Invalid date";
+  return londonShortDateTimeFormatter.format(d);
 }
 
 /**

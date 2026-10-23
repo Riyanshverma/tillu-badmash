@@ -11,6 +11,7 @@ import {
   mockAccuracyResponse,
   mockComparisonResponse,
   mockEvolutionResponse,
+  mockEvolutionHour17Response,
 } from "./fixtures";
 import { formatMw } from "../lib/format";
 import { queryKeys } from "../lib/queries";
@@ -156,16 +157,18 @@ describe("Phase 3: Accuracy View & Components", () => {
 
   describe("ErrorHeatmap", () => {
     it("renders exactly 744 cells (31 days x 24 hours)", () => {
-      render(<ErrorHeatmap heatmapData={mockAccuracyResponse.heatmap} />);
+      const { container } = render(
+        <ErrorHeatmap heatmapData={mockAccuracyResponse.heatmap} />
+      );
 
       expect(mockAccuracyResponse.heatmap).toHaveLength(744);
       expect(screen.getByText("January Forecast Error Heatmap")).toBeInTheDocument();
       expect(screen.getByText(/744 total intervals/)).toBeInTheDocument();
 
       // Find all cell buttons with aria-label containing Jan 2026
-      const cells = screen.getAllByRole("button", { name: /Jan 2026/ });
+      const cells = container.querySelectorAll("button[aria-label*='Jan 2026']");
       expect(cells).toHaveLength(744);
-    }, 15000);
+    });
 
     it("displays color legend with all 5 bins", () => {
       render(<ErrorHeatmap heatmapData={mockAccuracyResponse.heatmap} />);
@@ -197,19 +200,27 @@ describe("Phase 3: Accuracy View & Components", () => {
   });
 
   describe("ForecastEvolutionChart", () => {
-    it("renders vintage points and correctly distinguishes pre-cutoff vs post-cutoff", () => {
+    it("renders vintage points and dynamic captions for representative noon case", () => {
       const { container } = render(
         <ForecastEvolutionChart evolution={mockEvolutionResponse} />
       );
 
-      expect(screen.getByText("Forecast Evolution for Target Hour (12:00 GMT)")).toBeInTheDocument();
-      expect(screen.getByText(/Target delivery: 16 Jan 2026 at 12:00 GMT/)).toBeInTheDocument();
+      expect(
+        screen.getByText("Forecast Evolution for Target Hour (12:00 GMT)")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Target delivery: 16 Jan 2026 at 12:00 GMT · Progression of forecast vintages before and after 09:20 GMT cutoff/
+        )
+      ).toBeInTheDocument();
 
       // Check vintage points exist in the fixture series
       expect(mockEvolutionResponse.series).toHaveLength(8);
 
       // Selected vintage is 07:30Z
-      const selected = mockEvolutionResponse.series.find((v) => v.is_selected_at_decision);
+      const selected = mockEvolutionResponse.series.find(
+        (v) => v.is_selected_at_decision
+      );
       expect(selected).toBeDefined();
       expect(selected?.publish_time).toBe("2026-01-15T07:30:00Z");
       expect(selected?.forecast_mw).toBe(7779.0);
@@ -223,9 +234,94 @@ describe("Phase 3: Accuracy View & Components", () => {
       expect(postCutoff?.is_available_at_decision).toBe(false);
       expect(postCutoff?.is_selected_at_decision).toBe(false);
 
+      // Dynamic legend badges
+      expect(screen.getByText("Selected Vintage (07:30 GMT)")).toBeInTheDocument();
+      expect(screen.getByText("Actual Outturn (8,767 MW)")).toBeInTheDocument();
+      expect(screen.getByText("09:20 GMT Decision Cutoff")).toBeInTheDocument();
+
+      // Dynamic footer
+      expect(
+        screen.getByText(
+          /Selected: 07:30 GMT vintage \(7,779 MW\) · Next vintage \(09:30 GMT\) is post-cutoff \(\+10m\)/
+        )
+      ).toBeInTheDocument();
+
       // Actual reference line
       expect(mockEvolutionResponse.actual_mw).toBe(8766.5);
-      expect(container.querySelector(".recharts-responsive-container")).toBeInTheDocument();
+      expect(
+        container.querySelector(".recharts-responsive-container")
+      ).toBeInTheDocument();
+    });
+
+    it("renders dynamic captions for alternate target hour (17:00 target)", () => {
+      render(
+        <ForecastEvolutionChart evolution={mockEvolutionHour17Response} />
+      );
+
+      // Title & subtitle must dynamically reflect 17:00 GMT and 30 Jan 2026
+      expect(
+        screen.getByText("Forecast Evolution for Target Hour (17:00 GMT)")
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Target delivery: 30 Jan 2026 at 17:00 GMT · Progression of forecast vintages before and after 09:20 GMT cutoff/
+        )
+      ).toBeInTheDocument();
+
+      // Badges must reflect 17:00 target's actual (16,352 MW) and selected vintage (07:30 GMT)
+      expect(screen.getByText("Selected Vintage (07:30 GMT)")).toBeInTheDocument();
+      expect(screen.getByText("Actual Outturn (16,352 MW)")).toBeInTheDocument();
+      expect(screen.getByText("09:20 GMT Decision Cutoff")).toBeInTheDocument();
+
+      // Footer must reflect 16,883 MW
+      expect(
+        screen.getByText(
+          /Selected: 07:30 GMT vintage \(16,883 MW\) · Next vintage \(09:30 GMT\) is post-cutoff \(\+10m\)/
+        )
+      ).toBeInTheDocument();
+
+      // Negative assertions: hard-coded noon values must NOT appear
+      expect(screen.queryByText(/12:00 GMT/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/7,779 MW/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/8,767 MW/)).not.toBeInTheDocument();
+    });
+
+    it("positions cutoff marker separately from selected vintage publication", () => {
+      // Selected publish time is 07:30Z; cutoff is 09:20Z; first post-cutoff is 09:30Z
+      const selectedItem = mockEvolutionResponse.series.find(
+        (v) => v.is_selected_at_decision
+      )!;
+      const firstPostCutoff = mockEvolutionResponse.series.find(
+        (v) => !v.is_available_at_decision
+      )!;
+
+      const selectedTs = new Date(selectedItem.publish_time).getTime();
+      const cutoffTs = new Date(mockEvolutionResponse.decision_cutoff).getTime();
+      const postCutoffTs = new Date(firstPostCutoff.publish_time).getTime();
+
+      // Strict ordering: selected < cutoff < postCutoff
+      expect(selectedTs).toBeLessThan(cutoffTs);
+      expect(cutoffTs).toBeLessThan(postCutoffTs);
+
+      // Verify the cutoff timestamp is 110 minutes after selected publish time
+      expect((cutoffTs - selectedTs) / 60000).toBe(110);
+      // Verify first post-cutoff is 10 minutes after decision cutoff
+      expect((postCutoffTs - cutoffTs) / 60000).toBe(10);
+    });
+
+    it("handles zero actual_mw outturn without displaying missing dash", () => {
+      render(
+        <ForecastEvolutionChart
+          evolution={{
+            ...mockEvolutionResponse,
+            actual_mw: 0,
+          }}
+        />
+      );
+
+      // Outturn legend badge should show (0 MW), not (—)
+      expect(screen.getByText("Actual Outturn (0 MW)")).toBeInTheDocument();
+      expect(screen.queryByText("Actual Outturn (—)")).not.toBeInTheDocument();
     });
   });
 });

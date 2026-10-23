@@ -9,6 +9,7 @@ import {
   formatLondonDateTime,
   formatLondonDate,
   formatLondonTime,
+  formatLondonShortDateTime,
   formatHourLabel,
   formatForecastAge,
 } from "../lib/dates";
@@ -90,6 +91,13 @@ describe("Formatting & Presentation Utilities (Phase 5 Quality)", () => {
     it("formats ISO time explicitly in Europe/London", () => {
       expect(formatLondonTime("2026-01-15T07:30:00Z")).toBe("07:30 GMT");
       expect(formatLondonTime("2026-01-15T09:20:00Z")).toBe("09:20 GMT");
+    });
+
+    it("formats ISO datetime or timestamp to short London datetime (day, month, time)", () => {
+      expect(formatLondonShortDateTime("2026-01-15T07:30:00Z")).toBe("15 Jan, 07:30");
+      expect(formatLondonShortDateTime("2026-01-15T09:20:00Z")).toBe("15 Jan, 09:20");
+      const epochMs = new Date("2026-01-15T07:30:00Z").getTime();
+      expect(formatLondonShortDateTime(epochMs)).toBe("15 Jan, 07:30");
     });
 
     it("formats delivery hour label 0..23", () => {
