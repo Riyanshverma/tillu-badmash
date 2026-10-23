@@ -6,6 +6,7 @@ import {
   mwNonNegativeSchema,
   mwSchema,
   percentSchema,
+  wapeSchema,
 } from "./common";
 
 export const AccuracyPeriodSchema = z.object({
@@ -20,7 +21,7 @@ export const AccuracyMetricsSchema = z.object({
   mae_mw: mwNonNegativeSchema,
   rmse_mw: mwNonNegativeSchema,
   bias_mw: mwSchema,
-  wape_percent: percentSchema,
+  wape_percent: wapeSchema,
   p90_abs_error_mw: mwNonNegativeSchema,
   over_forecast_percent: percentSchema,
   under_forecast_percent: percentSchema,

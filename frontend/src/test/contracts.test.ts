@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  AccuracyMetricsSchema,
   AccuracyResponseSchema,
   ComparisonResponseSchema,
   DecisionResponseSchema,
@@ -100,8 +101,8 @@ describe("Frontend Public Contracts & Typed Fixtures (Phase 0)", () => {
       const hour12 = mockComparisonResponse.series.find((pt) => pt.hour === 12);
       expect(hour12).toBeDefined();
       expect(hour12?.forecast_mw).toBe(7779.0);
-      expect(hour12?.actual_mw).toBe(8781.0);
-      expect(hour12?.error_mw).toBe(-1002.0); // Under-forecast
+      expect(hour12?.actual_mw).toBe(8766.5);
+      expect(hour12?.error_mw).toBe(-987.5); // Under-forecast
     });
 
     it("rejects comparison with missing actual_mw or invalid hour", () => {
@@ -163,6 +164,53 @@ describe("Frontend Public Contracts & Typed Fixtures (Phase 0)", () => {
         },
       };
       expect(() => AccuracyResponseSchema.parse(invalid)).toThrow();
+    });
+
+    it("validates WAPE schema correctly: accepts finite non-negative values, values > 100%, and null; rejects negative, NaN, Infinity", () => {
+      // Accepts standard percentage
+      const validStandard = AccuracyMetricsSchema.parse({
+        ...mockAccuracyResponse.metrics,
+        wape_percent: 8.7,
+      });
+      expect(validStandard.wape_percent).toBe(8.7);
+
+      // Accepts WAPE > 100% (not capped at 100%)
+      const validHigh = AccuracyMetricsSchema.parse({
+        ...mockAccuracyResponse.metrics,
+        wape_percent: 140.5,
+      });
+      expect(validHigh.wape_percent).toBe(140.5);
+
+      // Accepts null (when actual generation denominator is zero)
+      const validNull = AccuracyMetricsSchema.parse({
+        ...mockAccuracyResponse.metrics,
+        wape_percent: null,
+      });
+      expect(validNull.wape_percent).toBeNull();
+
+      // Rejects negative
+      expect(() =>
+        AccuracyMetricsSchema.parse({
+          ...mockAccuracyResponse.metrics,
+          wape_percent: -1,
+        })
+      ).toThrow();
+
+      // Rejects NaN
+      expect(() =>
+        AccuracyMetricsSchema.parse({
+          ...mockAccuracyResponse.metrics,
+          wape_percent: NaN,
+        })
+      ).toThrow();
+
+      // Rejects Infinity
+      expect(() =>
+        AccuracyMetricsSchema.parse({
+          ...mockAccuracyResponse.metrics,
+          wape_percent: Infinity,
+        })
+      ).toThrow();
     });
   });
 

@@ -3,18 +3,23 @@ import { CalendarDays } from "lucide-react";
 interface DecisionHeaderProps {
   selectedDate: string;
   onDateChange?: (date: string) => void;
+  isLoading?: boolean;
 }
 
-export function DecisionHeader({ selectedDate }: DecisionHeaderProps) {
+export function DecisionHeader({
+  selectedDate,
+  onDateChange,
+  isLoading = false,
+}: DecisionHeaderProps) {
   // Generate January 2026 decision dates list (2026-01-01 to 2026-01-31)
   const janDays = Array.from({ length: 31 }, (_, i) => {
     const day = (i + 1).toString().padStart(2, "0");
     const date = `2026-01-${day}`;
-    const nextDay = i + 1 === 31 ? "01 Feb" : `${(i + 2).toString().padStart(2, "0")} Jan`;
+    const nextDay =
+      i + 1 === 31 ? "01 Feb" : `${(i + 2).toString().padStart(2, "0")} Jan`;
     return {
       date,
       label: `${day} Jan 2026 (Delivery: ${nextDay})`,
-      isCurrentFixture: date === selectedDate,
     };
   });
 
@@ -41,19 +46,13 @@ export function DecisionHeader({ selectedDate }: DecisionHeaderProps) {
           id="decision-date-select"
           aria-label="Select Decision Date"
           value={selectedDate}
-          disabled={false}
-          className="h-9 px-3 py-1 bg-white border border-slate-200 rounded-[6px] text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer shadow-sm"
-          onChange={() => {
-            // Static in Phase 2; full interactive data switching wired in Phase 4
-          }}
+          disabled={isLoading}
+          className="h-9 px-3 py-1 bg-white border border-slate-200 rounded-[6px] text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent cursor-pointer shadow-xs disabled:opacity-60"
+          onChange={(e) => onDateChange?.(e.target.value)}
         >
           {janDays.map((d) => (
-            <option
-              key={d.date}
-              value={d.date}
-              disabled={!d.isCurrentFixture}
-            >
-              {d.label} {d.isCurrentFixture ? "· Active Fixture" : "· (Phase 4)"}
+            <option key={d.date} value={d.date}>
+              {d.label}
             </option>
           ))}
         </select>

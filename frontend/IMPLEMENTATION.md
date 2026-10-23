@@ -215,7 +215,7 @@ Mark Phase 3 complete and stop.
 
 ---
 
-## [ ] Phase 4 — Backend integration and runtime validation
+## [x] Phase 4 — Backend integration and runtime validation
 
 ### Goal
 
@@ -261,7 +261,7 @@ Mark Phase 4 complete and stop.
 
 ---
 
-## [ ] Phase 5 — Quality and Docker integration
+## [x] Phase 5 — Quality and Docker integration
 
 ### Goal
 

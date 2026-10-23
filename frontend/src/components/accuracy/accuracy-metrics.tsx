@@ -33,7 +33,11 @@ export function AccuracyMetricsGrid({ metrics }: AccuracyMetricsProps) {
       <MetricCard
         label="WAPE"
         value={formatPercent(metrics.wape_percent, 1)}
-        description="Weighted absolute percentage error"
+        description={
+          metrics.wape_percent === null
+            ? "Unavailable because total actual generation is zero"
+            : "Weighted absolute percentage error"
+        }
         accent="blue"
       />
       <MetricCard

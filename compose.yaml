@@ -1,0 +1,27 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+    environment:
+      DATABASE_PATH: /app/data/wind.db
+      ELEXON_BASE_URL: https://data.elexon.co.uk/bmrs/api/v1
+      API_PREFIX: /api/v1
+      CORS_ORIGINS: '["http://localhost:${FRONTEND_PORT:-5173}"]'
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    volumes:
+      - backend-data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:${BACKEND_PORT:-8000}}
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  backend-data:

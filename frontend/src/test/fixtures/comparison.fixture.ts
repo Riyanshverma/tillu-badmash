@@ -120,9 +120,9 @@ export const mockComparisonResponse: ComparisonResponse = {
       start_time: "2026-01-16T12:00:00Z",
       hour: 12,
       forecast_mw: 7779.0,
-      actual_mw: 8781.0,
-      error_mw: -1002.0,
-      absolute_error_mw: 1002.0,
+      actual_mw: 8766.5,
+      error_mw: -987.5,
+      absolute_error_mw: 987.5,
     },
     {
       start_time: "2026-01-16T13:00:00Z",

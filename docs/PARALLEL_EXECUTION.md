@@ -157,7 +157,8 @@ No Postgres.
 
 No Redis.
 
-Do not change the root README yet.
+The root README was deferred during implementation and is finalized by the
+repository audit after both implementation plans are complete.
 
 ---
 

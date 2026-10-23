@@ -16,10 +16,14 @@ All numeric outputs are finite. `metrics.wape_percent` is a nonnegative number
 without a 100% ceiling, or `null` when the matched actual denominator is zero.
 This reflects the verified Phase 5 formula; WAPE is not a bounded accuracy score.
 Other metrics are non-null on successful responses (zero matches return 404).
-The existing frontend `percentSchema` for WAPE must become
-`z.number().finite().nonnegative().nullable()` during frontend integration.
+Frontend `wapeSchema` uses `z.number().finite().nonnegative().nullable()`;
+directional percentages retain the bounded 0..100 `percentSchema`.
 
 Frontend may format MW as GW for presentation.
+
+JSON examples below illustrate response shapes, with shortened series and
+illustrative summary metrics. Captured January responses and measured metrics are
+in `tests/fixtures/api/`; the root `FINAL_AUDIT.md` records final live verification.
 
 ---
 
@@ -388,6 +392,5 @@ When a public contract changes:
 
 Never change only one side.
 
-Phase 6 exception authorized by the phase scope: the WAPE correction is recorded
-here, in backend models/tests and the Phase 6 frontend handoff. Frontend Zod and
-fixture changes are deferred to frontend integration; no frontend files are edited.
+The Phase 6 WAPE correction was reconciled in Frontend Phase 4. Backend public
+models, frontend Zod schemas and tests now agree on nullable, unbounded WAPE.

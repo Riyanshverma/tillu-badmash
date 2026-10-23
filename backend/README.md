@@ -55,14 +55,37 @@ uv run ruff check
 uv run pytest
 ```
 
-Container:
+Container integration (run from the repository root):
 
 ```sh
-docker build -t gridbricks-backend:phase1 .
-docker run --rm -p 8000:8000 --env-file .env gridbricks-backend:phase1
+docker compose build
+docker compose up -d --wait
+docker compose exec backend uv run python -m app.scripts.sync_january_2026
 ```
 
-The image runs as a non-root user and reserves writable `/app/data` for SQLite. Its default `DATABASE_PATH` is `/app/data/wind.db`; omit `DATABASE_PATH` from a container env file to retain that default, or set it to the same absolute path. The sync command below initializes the database explicitly; analytical HTTP routes remain later-phase work.
+Open the frontend at `http://localhost:5173` and the API at
+`http://localhost:8000/api/v1/health`. The image runs as a non-root user and uses
+`/app/data/wind.db` on the Compose `backend-data` named volume. Startup initializes
+the schema only: health works before sync; analytics return documented missing-data
+responses until data is loaded. Sync remains the explicit command above.
+
+`docker compose down` followed by `docker compose up -d --wait` preserves the
+database. `down --volumes` explicitly deletes it and is not part of the normal
+workflow. No local developer database or local environment file enters an image.
+
+The backend image installs only frozen runtime dependencies and sets `UV_NO_SYNC=1`
+so `uv run` uses that installed environment without attempting a dev dependency
+install. Uvicorn listens on `0.0.0.0`; `UVICORN_PORT` defaults to 8000 for standalone
+containers. Compose uses internal port 8000 and publishes localhost-only ports.
+Its healthcheck follows `UVICORN_PORT` and `API_PREFIX`.
+
+Compose settings: `BACKEND_PORT` defaults to 8000, `FRONTEND_PORT` to 5173, and
+`LOG_LEVEL` to INFO. The configured CORS origin follows
+`http://localhost:${FRONTEND_PORT}`. The frontend Docker build receives
+`VITE_API_BASE_URL`, defaulting to `http://localhost:${BACKEND_PORT}`. Vite embeds
+this URL at build time: rebuild the frontend after changing it. Browser requests
+use this published host URL; `http://backend:8000` is for container-to-container
+traffic and is not browser-resolvable. No new reverse proxy is added.
 
 ## January data sync
 
@@ -138,7 +161,7 @@ suite uses temporary databases and controlled/captured fixtures without live acc
 
 ## Directory structure
 
-Target:
+Current layout (main files):
 
 ```text
 backend/
@@ -159,11 +182,15 @@ backend/
 │   │   └── logging.py
 │   ├── db/
 │   │   ├── connection.py
+│   │   ├── models.py
 │   │   ├── schema.sql
 │   │   └── repositories/
 │   │       ├── actuals.py
-│   │       └── forecasts.py
+│   │       ├── forecasts.py
+│   │       └── sync_runs.py
 │   ├── domain/
+│   │   ├── actuals.py
+│   │   ├── comparison.py
 │   │   ├── decision.py
 │   │   ├── metrics.py
 │   │   └── uncertainty.py
@@ -171,6 +198,7 @@ backend/
 │   │   ├── upstream.py
 │   │   └── api.py
 │   ├── services/
+│   │   ├── api_service.py
 │   │   ├── ingestion.py
 │   │   ├── decision_service.py
 │   │   └── accuracy_service.py
@@ -181,9 +209,8 @@ backend/
 │   └── .gitkeep
 ├── tests/
 │   ├── fixtures/
-│   ├── unit/
-│   ├── integration/
-│   └── conftest.py
+│   ├── test_*.py
+│   └── verify_phase6_http.py
 ├── .env.example
 ├── Dockerfile
 ├── pyproject.toml

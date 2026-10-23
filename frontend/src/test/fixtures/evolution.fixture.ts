@@ -5,7 +5,7 @@ export const mockEvolutionResponse: ForecastEvolutionResponse = {
   hour: 12,
   decision_date: "2026-01-15",
   decision_cutoff: "2026-01-15T09:20:00Z",
-  actual_mw: 8781.0,
+  actual_mw: 8766.5,
   selected_publish_time: "2026-01-15T07:30:00Z",
   series: [
     {

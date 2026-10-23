@@ -18,17 +18,33 @@ import {
   formatPercent,
   formatSignedErrorMw,
 } from "../lib/format";
+import { queryKeys } from "../lib/queries";
+import {
+  mockDecisionResponse,
+  mockAccuracyResponse,
+  mockComparisonResponse,
+  mockEvolutionResponse,
+} from "./fixtures";
+import { createTestQueryClient, TestQueryWrapper } from "./test-utils";
 
 describe("Phase 1: App Shell & Routing", () => {
   it("renders AppShell top navigation with title and links", () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(
+      queryKeys.decision("2026-01-15"),
+      mockDecisionResponse
+    );
+
     render(
-      <MemoryRouter initialEntries={["/"]}>
-        <Routes>
-          <Route path="/" element={<AppShell />}>
-            <Route index element={<DecisionPage />} />
-          </Route>
-        </Routes>
-      </MemoryRouter>
+      <TestQueryWrapper client={queryClient}>
+        <MemoryRouter initialEntries={["/"]}>
+          <Routes>
+            <Route path="/" element={<AppShell />}>
+              <Route index element={<DecisionPage />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </TestQueryWrapper>
     );
 
     expect(screen.getByText("Wind Decision Console")).toBeInTheDocument();
@@ -41,14 +57,27 @@ describe("Phase 1: App Shell & Routing", () => {
   });
 
   it("renders AccuracyPage placeholder when navigating to /accuracy", () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(queryKeys.accuracy(), mockAccuracyResponse);
+    queryClient.setQueryData(
+      queryKeys.comparison("2026-01-15"),
+      mockComparisonResponse
+    );
+    queryClient.setQueryData(
+      queryKeys.forecastEvolution("2026-01-16T12:00:00Z"),
+      mockEvolutionResponse
+    );
+
     render(
-      <MemoryRouter initialEntries={["/accuracy"]}>
-        <Routes>
-          <Route path="/" element={<AppShell />}>
-            <Route path="accuracy" element={<AccuracyPage />} />
-          </Route>
-        </Routes>
-      </MemoryRouter>
+      <TestQueryWrapper client={queryClient}>
+        <MemoryRouter initialEntries={["/accuracy"]}>
+          <Routes>
+            <Route path="/" element={<AppShell />}>
+              <Route path="accuracy" element={<AccuracyPage />} />
+            </Route>
+          </Routes>
+        </MemoryRouter>
+      </TestQueryWrapper>
     );
 
     expect(

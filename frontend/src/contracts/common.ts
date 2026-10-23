@@ -24,6 +24,9 @@ export const mwSchema = z.number().finite();
 // Percentage value (0 to 100)
 export const percentSchema = z.number().finite().min(0).max(100);
 
+// WAPE percentage - non-negative finite value without upper ceiling, or null if actual denominator is zero
+export const wapeSchema = z.number().finite().nonnegative().nullable();
+
 // Health check schema
 export const HealthResponseSchema = z.object({
   status: z.literal("ok"),

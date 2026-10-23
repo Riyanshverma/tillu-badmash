@@ -1,7 +1,19 @@
 import { z } from "zod";
+import {
+  AccuracyResponseSchema,
+  ComparisonResponseSchema,
+  DecisionResponseSchema,
+  ForecastEvolutionResponseSchema,
+  HealthResponseSchema,
+  type AccuracyResponse,
+  type ComparisonResponse,
+  type DecisionResponse,
+  type ForecastEvolutionResponse,
+  type HealthResponse,
+} from "../contracts";
 
-const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
+export const API_BASE_URL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/+$/, "") ||
   "http://localhost:8000";
 
 export class ApiError extends Error {
@@ -35,7 +47,7 @@ export async function fetchAndValidate<T>(
 ): Promise<T> {
   const url = endpoint.startsWith("http")
     ? endpoint
-    : `${API_BASE_URL}${endpoint}`;
+    : `${API_BASE_URL}${endpoint.startsWith("/") ? endpoint : `/${endpoint}`}`;
 
   const response = await fetch(url, {
     ...init,
@@ -64,4 +76,34 @@ export async function fetchAndValidate<T>(
   }
 
   return parseResult.data;
+}
+
+// ---------------------------------------------------------------------------
+// Typed API Client Functions
+// ---------------------------------------------------------------------------
+
+export async function getDecision(decisionDate: string): Promise<DecisionResponse> {
+  return fetchAndValidate(`/api/v1/decisions/${decisionDate}`, DecisionResponseSchema);
+}
+
+export async function getAccuracy(): Promise<AccuracyResponse> {
+  return fetchAndValidate("/api/v1/accuracy", AccuracyResponseSchema);
+}
+
+export async function getComparison(decisionDate: string): Promise<ComparisonResponse> {
+  return fetchAndValidate(`/api/v1/comparisons/${decisionDate}`, ComparisonResponseSchema);
+}
+
+export async function getForecastEvolution(
+  targetTime: string
+): Promise<ForecastEvolutionResponse> {
+  const query = new URLSearchParams({ target_time: targetTime }).toString();
+  return fetchAndValidate(
+    `/api/v1/forecast-evolution?${query}`,
+    ForecastEvolutionResponseSchema
+  );
+}
+
+export async function getHealth(): Promise<HealthResponse> {
+  return fetchAndValidate("/api/v1/health", HealthResponseSchema);
 }

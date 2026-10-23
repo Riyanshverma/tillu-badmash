@@ -31,7 +31,7 @@ function generateHeatmapPoints(): AccuracyHeatmapPoint[] {
       // Ensure exact match for empirical anchor: 2026-01-15 decision, hour 12
       if (day === 15 && hour === 12) {
         forecastMw = 7779.0;
-        actualMw = 8781.0;
+        actualMw = 8766.5;
       }
 
       const errorMw = Math.round((forecastMw - actualMw) * 10) / 10;

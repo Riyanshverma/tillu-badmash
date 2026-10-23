@@ -42,8 +42,8 @@ export function formatSignedErrorMw(mw: number, decimals = 0): string {
 /**
  * Format a percentage value (e.g. 8.7 -> "8.7%").
  */
-export function formatPercent(val: number, decimals = 1): string {
-  if (!isFinite(val)) return "—";
+export function formatPercent(val: number | null | undefined, decimals = 1): string {
+  if (val === null || val === undefined || !isFinite(val)) return "—";
   return `${val.toLocaleString("en-GB", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,

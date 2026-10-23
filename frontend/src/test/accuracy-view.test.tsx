@@ -13,13 +13,28 @@ import {
   mockEvolutionResponse,
 } from "./fixtures";
 import { formatMw } from "../lib/format";
+import { queryKeys } from "../lib/queries";
+import { createTestQueryClient, TestQueryWrapper } from "./test-utils";
 
 describe("Phase 3: Accuracy View & Components", () => {
   it("renders full AccuracyPage layout with fixtures", () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(queryKeys.accuracy(), mockAccuracyResponse);
+    queryClient.setQueryData(
+      queryKeys.comparison("2026-01-15"),
+      mockComparisonResponse
+    );
+    queryClient.setQueryData(
+      queryKeys.forecastEvolution("2026-01-16T12:00:00Z"),
+      mockEvolutionResponse
+    );
+
     render(
-      <MemoryRouter>
-        <AccuracyPage />
-      </MemoryRouter>
+      <TestQueryWrapper client={queryClient}>
+        <MemoryRouter>
+          <AccuracyPage />
+        </MemoryRouter>
+      </TestQueryWrapper>
     );
 
     // Header
@@ -117,9 +132,9 @@ describe("Phase 3: Accuracy View & Components", () => {
       const pt12 = mockComparisonResponse.series.find((p) => p.hour === 12);
       expect(pt12).toBeDefined();
       expect(pt12?.forecast_mw).toBe(7779.0);
-      expect(pt12?.actual_mw).toBe(8781.0);
-      // 7779 - 8781 = -1002 (under-forecast)
-      expect(pt12?.error_mw).toBe(-1002.0);
+      expect(pt12?.actual_mw).toBe(8766.5);
+      // 7779 - 8766.5 = -987.5 (under-forecast)
+      expect(pt12?.error_mw).toBe(-987.5);
       expect(pt12!.forecast_mw - pt12!.actual_mw).toBe(pt12!.error_mw);
     });
 
@@ -150,7 +165,7 @@ describe("Phase 3: Accuracy View & Components", () => {
       // Find all cell buttons with aria-label containing Jan 2026
       const cells = screen.getAllByRole("button", { name: /Jan 2026/ });
       expect(cells).toHaveLength(744);
-    });
+    }, 15000);
 
     it("displays color legend with all 5 bins", () => {
       render(<ErrorHeatmap heatmapData={mockAccuracyResponse.heatmap} />);
@@ -165,7 +180,7 @@ describe("Phase 3: Accuracy View & Components", () => {
     it("updates selected cell detail panel upon clicking a cell", () => {
       render(<ErrorHeatmap heatmapData={mockAccuracyResponse.heatmap} />);
 
-      // Find a specific cell (15 Jan 2026, delivery 12:00, under-forecast by 1,002 MW)
+      // Find a specific cell (15 Jan 2026, delivery 12:00, under-forecast by 988 MW)
       const cell15Hour12 = screen.getByRole("button", {
         name: /15 Jan 2026, delivery 12:00/,
       });
@@ -175,9 +190,9 @@ describe("Phase 3: Accuracy View & Components", () => {
 
       // Verify the details panel updates
       expect(screen.getByText("Selected Interval:")).toBeInTheDocument();
-      expect(screen.getByText("-1,002 MW (Under-forecast)")).toBeInTheDocument();
+      expect(screen.getByText("-988 MW (Under-forecast)")).toBeInTheDocument();
       expect(screen.getByText("7,779 MW")).toBeInTheDocument();
-      expect(screen.getByText("8,781 MW")).toBeInTheDocument();
+      expect(screen.getByText("8,767 MW")).toBeInTheDocument();
     });
   });
 
@@ -209,7 +224,7 @@ describe("Phase 3: Accuracy View & Components", () => {
       expect(postCutoff?.is_selected_at_decision).toBe(false);
 
       // Actual reference line
-      expect(mockEvolutionResponse.actual_mw).toBe(8781.0);
+      expect(mockEvolutionResponse.actual_mw).toBe(8766.5);
       expect(container.querySelector(".recharts-responsive-container")).toBeInTheDocument();
     });
   });

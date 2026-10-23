@@ -7,13 +7,23 @@ import { DecisionMetrics } from "../components/decision/decision-metrics";
 import { ForecastProfileChart } from "../components/charts/forecast-profile-chart";
 import { mockDecisionResponse } from "./fixtures";
 import { formatGw, formatMw } from "../lib/format";
+import { queryKeys } from "../lib/queries";
+import { createTestQueryClient, TestQueryWrapper } from "./test-utils";
 
 describe("Phase 2: Decision View & Components", () => {
   it("renders DecisionPage full structure with fixture data", () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(
+      queryKeys.decision("2026-01-15"),
+      mockDecisionResponse
+    );
+
     render(
-      <MemoryRouter>
-        <DecisionPage />
-      </MemoryRouter>
+      <TestQueryWrapper client={queryClient}>
+        <MemoryRouter>
+          <DecisionPage />
+        </MemoryRouter>
+      </TestQueryWrapper>
     );
 
     // Header
