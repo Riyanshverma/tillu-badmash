@@ -571,8 +571,6 @@ Example:
 ```text
 ELEXON_BASE_URL=https://data.elexon.co.uk/bmrs/api/v1
 DATABASE_PATH=/app/data/wind.db
-DECISION_TIME=09:20
-MARKET_TIMEZONE=Europe/London
 API_PREFIX=/api/v1
 CORS_ORIGINS=...
 ```

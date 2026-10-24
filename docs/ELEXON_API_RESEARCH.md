@@ -12,7 +12,7 @@ These observed behaviors are authoritative for implementation unless later live 
 
 A narrow recheck of FUELHH for 2026-01-16 found 8781 MW at 12:00Z (settlement period 25, published 12:30Z) and 8752 MW at 12:30Z (period 26, published 13:00Z). The hourly actual is therefore `(8781 + 8752) / 2 = 8766.5 MW`. The earlier 8781 MW hourly example does not match this live pair; 8781 is the first half-hour value in the current response. This is an example-data correction, not a change to the averaging or error-sign rules. The original 8600/8962 → 8781 arithmetic case remains a synthetic unit-test fixture.
 
-The exact two raw records are retained in `backend/tests/fixtures/fuelhh-wind-2026-01-16-noon.json`. The 07:30Z forecast remains 7779 MW, so the illustrative signed difference becomes -987.5 MW. Public field names/types are unchanged; frontend schemas need no changes. Frontend fixtures were not modified.
+The verified pair above yields 8766.5 MW. The 07:30Z forecast remains 7779 MW, so the illustrative signed difference is -987.5 MW. Public field names/types are unchanged; frontend schemas need no changes.
 
 Base URL:
 

@@ -23,19 +23,6 @@ async def upsert(connection: aiosqlite.Connection, record: Forecast) -> None:
     )
 
 
-async def for_date(
-    connection: aiosqlite.Connection, target_date: date,
-) -> list[Forecast]:
-    rows = await connection.execute_fetchall(
-        """
-        SELECT * FROM wind_forecasts_hourly
-        WHERE target_date = ? ORDER BY start_time, publish_time
-        """,
-        (target_date.isoformat(),),
-    )
-    return [Forecast.model_validate(dict(row)) for row in rows]
-
-
 async def for_target(
     connection: aiosqlite.Connection, start_time: datetime,
 ) -> list[Forecast]:

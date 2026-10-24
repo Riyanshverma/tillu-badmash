@@ -10,8 +10,6 @@ Read first:
 - [`../docs/ELEXON_API_RESEARCH.md`](../docs/ELEXON_API_RESEARCH.md)
 - [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 - [`CONTRACTS.md`](./CONTRACTS.md)
-- [`IMPLEMENTATION.md`](./IMPLEMENTATION.md)
-- [`AGENTS.md`](./AGENTS.md)
 
 ---
 
@@ -25,8 +23,6 @@ Read first:
 - httpx
 - aiosqlite
 - NumPy
-- pytest
-- pytest-asyncio
 - Ruff
 - Docker
 
@@ -52,7 +48,6 @@ Checks:
 
 ```sh
 uv run ruff check
-uv run pytest
 ```
 
 Container integration (run from the repository root):
@@ -112,7 +107,7 @@ Internal helpers in `app/services/decision_service.py` operate on an existing da
 
 Both results expose expected, available and missing hour counts. These are internal January-pilot results, not public API responses or accuracy metrics.
 
-The January 16 noon live FUELHH pair is 8781/8752 MW, yielding 8766.5 MW. The selected January 15 forecast remains 7779 MW published at 07:30Z. See `PHASE4_VERIFICATION.md` for the correction to earlier example values and live boundary checks. The 8600/8962 → 8781 arithmetic fixture remains in the unit tests.
+The January 16 noon live FUELHH pair is 8781/8752 MW, yielding 8766.5 MW. The selected January 15 forecast remains 7779 MW published at 07:30Z.
 
 ## Internal accuracy and uncertainty analytics
 
@@ -127,7 +122,7 @@ Pure domain functions calculate MAE, RMSE, signed bias, WAPE, linear-method P90 
 
 `forecast_bands(selected_forecasts, hour_statistics)` in `app/domain/uncertainty.py` attaches each target hour's historical P90, with lower bound clipped to zero. An hour without history has unknown band values. These are retrospective January historical error bands, not confidence intervals.
 
-## Public API (Phase 6)
+## Public API
 
 Run `uv run uvicorn app.main:app --host 127.0.0.1 --port 8000` from backend/.
 The configured SQLite schema initializes on startup; loading data still requires
@@ -141,21 +136,13 @@ the explicit January sync command. No Elexon request runs on startup or an API r
 
 `/docs` and `/openapi.json` describe the Pydantic response models in
 `app/models/api.py`. Thin routes call `app/services/api_service.py`, which assembles
-existing Phase 4/5 results. Each request uses a consistent SQLite read snapshot.
+existing analytical results. Each request uses a consistent SQLite read snapshot.
 See CONTRACTS.md for 404 missing-data and 422 invalid-input behavior. Partial
 comparisons retain explicit completeness; missing actuals are never zero-filled.
 WAPE is nonnegative, unbounded above, and nullable for a zero actual denominator.
 
-`tests/fixtures/api/` contains captured real HTTP responses; accuracy is an explicitly
-labelled summary rather than the full 744-row payload. To repeat live verification
-using a disposable database and localhost server:
-
-```sh
-PYTHONPATH=. uv run python tests/verify_phase6_http.py
-```
-
-This explicitly invoked verifier requires Elexon network access. The regular pytest
-suite uses temporary databases and controlled/captured fixtures without live access.
+Response examples are in CONTRACTS.md. After loading January data, check the five
+endpoints above; see ../CLEANUP_REPORT.md for the latest smoke verification.
 
 ---
 
@@ -207,18 +194,12 @@ backend/
 │   └── main.py
 ├── data/
 │   └── .gitkeep
-├── tests/
-│   ├── fixtures/
-│   ├── test_*.py
-│   └── verify_phase6_http.py
 ├── .env.example
 ├── Dockerfile
 ├── pyproject.toml
 ├── uv.lock
 ├── ARCHITECTURE.md
 ├── CONTRACTS.md
-├── IMPLEMENTATION.md
-├── AGENTS.md
 └── README.md
 ```
 

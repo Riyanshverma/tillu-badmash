@@ -133,7 +133,7 @@ export function ForecastErrorChart({
         </div>
       </div>
 
-      <div className="w-full h-[280px] pt-4" data-testid="signed-error-chart-container">
+      <div className="w-full h-[280px] pt-4">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}

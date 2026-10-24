@@ -63,7 +63,7 @@ export function ChartCardSkeleton({
 
 export function DecisionPageSkeleton() {
   return (
-    <div className="space-y-6" data-testid="decision-loading-skeleton">
+    <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-5 animate-pulse">
         <div className="space-y-2">
           <div className="h-7 w-60 bg-slate-300 rounded" />
@@ -80,7 +80,7 @@ export function DecisionPageSkeleton() {
 
 export function AccuracyPageSkeleton() {
   return (
-    <div className="space-y-8" data-testid="accuracy-loading-skeleton">
+    <div className="space-y-8">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-200 pb-5 animate-pulse">
         <div className="space-y-2">
           <div className="h-7 w-64 bg-slate-300 rounded" />

@@ -1,5 +1,10 @@
 # Final Audit
 
+Historical audit from before repository cleanup. Its test counts and phase-file
+references describe that earlier state; automated suites and workflow records
+have since been removed. See [CLEANUP_REPORT.md](CLEANUP_REPORT.md) for current
+verification and repository status.
+
 Date: 2026-10-24. Scope: the completed January pilot and local Compose workflow,
 with a single reviewer using the application. No product code or infrastructure
 behavior was changed by this audit.

@@ -12,8 +12,6 @@ Before making changes, read:
 - [`../docs/ELEXON_API_RESEARCH.md`](../docs/ELEXON_API_RESEARCH.md)
 - [`../backend/CONTRACTS.md`](../backend/CONTRACTS.md)
 - [`DESIGN.md`](./DESIGN.md)
-- [`IMPLEMENTATION.md`](./IMPLEMENTATION.md)
-- [`AGENTS.md`](./AGENTS.md)
 
 ---
 
@@ -23,14 +21,10 @@ Before making changes, read:
 - TypeScript
 - Vite
 - Tailwind CSS
-- shadcn/ui
-- shadcn Charts
 - Recharts v3
 - Zod
 - TanStack Query
 - React Router
-- Vitest
-- React Testing Library
 - Docker
 
 Use Zod schemas as runtime response validators.
@@ -66,7 +60,7 @@ The frontend must never perform this aggregation itself.
 
 ## Charting decision
 
-Use shadcn Charts + Recharts v3 for:
+Use Recharts v3 for:
 
 - 24-point wind forecast profile
 - historical P90 error band
@@ -86,7 +80,7 @@ Do not add a second charting library only for the heatmap.
 
 ## Directory structure
 
-Target structure:
+Current structure:
 
 ```text
 frontend/
@@ -94,8 +88,7 @@ frontend/
 ├── src/
 │   ├── app/
 │   │   ├── app.tsx
-│   │   ├── router.tsx
-│   │   └── providers.tsx
+│   │   └── router.tsx
 │   ├── components/
 │   │   ├── charts/
 │   │   │   ├── forecast-profile-chart.tsx
@@ -106,27 +99,21 @@ frontend/
 │   │   ├── decision/
 │   │   ├── accuracy/
 │   │   ├── layout/
-│   │   └── ui/
+│   │   └── common/
 │   ├── contracts/
 │   │   ├── common.ts
 │   │   ├── decision.ts
 │   │   ├── accuracy.ts
 │   │   ├── comparison.ts
 │   │   └── evolution.ts
-│   ├── features/
-│   │   ├── decision/
-│   │   └── accuracy/
 │   ├── lib/
 │   │   ├── api-client.ts
-│   │   ├── query-client.ts
+│   │   ├── queries.ts
 │   │   ├── format.ts
 │   │   └── dates.ts
 │   ├── pages/
 │   │   ├── decision-page.tsx
 │   │   └── accuracy-page.tsx
-│   ├── test/
-│   │   ├── fixtures/
-│   │   └── setup.ts
 │   ├── main.tsx
 │   └── index.css
 ├── .env.example
@@ -134,8 +121,6 @@ frontend/
 ├── package.json
 ├── vite.config.ts
 ├── DESIGN.md
-├── IMPLEMENTATION.md
-├── AGENTS.md
 └── README.md
 ```
 
@@ -325,14 +310,15 @@ The root compose file will integrate frontend and backend.
 
 ## Quality bar
 
-Before a frontend phase can be marked complete:
+Before submission:
 
 - TypeScript passes
 - lint passes
-- phase tests pass
 - no browser console errors
 - no unexpected API failures
 - responsive layout is checked
-- key flows are exercised with Playwright
-- Chrome DevTools is used where network/layout/performance evidence is relevant
+- Decision, Accuracy, date selection, heatmap and evolution flows pass a browser smoke check
 - implementation matches `DESIGN.md`
+
+Run `npm install`, `npm run typecheck`, `npm run lint` and `npm run build` from
+frontend/. See ../CLEANUP_REPORT.md for the latest verification results.

@@ -4,16 +4,13 @@ import {
   ComparisonResponseSchema,
   DecisionResponseSchema,
   ForecastEvolutionResponseSchema,
-  HealthResponseSchema,
   type AccuracyResponse,
   type ComparisonResponse,
   type DecisionResponse,
   type ForecastEvolutionResponse,
-  type HealthResponse,
 } from "../contracts";
 
-export const API_BASE_URL =
-  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/+$/, "") ||
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/+$/, "") ||
   "http://localhost:8000";
 
 export class ApiError extends Error {
@@ -102,8 +99,4 @@ export async function getForecastEvolution(
     `/api/v1/forecast-evolution?${query}`,
     ForecastEvolutionResponseSchema
   );
-}
-
-export async function getHealth(): Promise<HealthResponse> {
-  return fetchAndValidate("/api/v1/health", HealthResponseSchema);
 }

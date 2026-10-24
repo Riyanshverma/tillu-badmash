@@ -138,8 +138,7 @@ missing data returns documented 404 responses. Partial comparisons include only
 matched hours and report completeness. Timestamps include explicit timezone
 offsets, and numeric values are finite or explicitly nullable.
 
-See [public contracts](backend/CONTRACTS.md) and the
-[captured response samples](backend/tests/fixtures/api/).
+See [public contracts](backend/CONTRACTS.md) for response examples.
 
 ## Forecast / actual alignment
 
@@ -183,7 +182,7 @@ about 2039 MW, RMSE 2505 MW, bias +1747.9 MW, WAPE 18.1%, P90 4098 MW, over-fore
 84.9% and under-forecast 15.1%. These are observed dataset results, not business
 constants or hard-coded product outputs.
 
-## Testing
+## Build and static checks
 
 For host-side checks, install Python 3.12 with uv and Node.js 22 with npm. From the
 repository root, run each block separately:
@@ -192,7 +191,6 @@ repository root, run each block separately:
 cd backend
 uv sync
 uv run ruff check .
-uv run pytest
 ```
 
 ```bash
@@ -200,26 +198,23 @@ cd frontend
 npm ci
 npm run typecheck
 npm run lint
-npm test
 npm run build
 ```
 
-The regular suites use controlled fixtures/mocked upstream responses; they do not
-require live Elexon. Final verification: **181 backend tests and 77 frontend tests**.
-See [FINAL_AUDIT.md](FINAL_AUDIT.md) for the current verification results.
+Automated test suites have been removed for the assessment submission. See
+[CLEANUP_REPORT.md](CLEANUP_REPORT.md) for static checks and runtime smoke results;
+[FINAL_AUDIT.md](FINAL_AUDIT.md) retains the earlier audit history.
 
 ## Project structure
 
 ```text
 backend/app/       API, Elexon client, persistence, domain analytics and sync CLI
-backend/tests/     Backend tests and representative real response samples
-frontend/src/      Views, charts, API client, Zod contracts and frontend tests
-docs/             Product context, verified Elexon research and execution plan
+frontend/src/      Views, charts, API client and Zod contracts
+docs/             Product context and verified Elexon research
 compose.yaml      Two services and the persistent SQLite volume
 ```
 
-Implementation plans and phase verification records remain in backend/ and
-frontend/. The [backend architecture](backend/ARCHITECTURE.md) and
+The [backend architecture](backend/ARCHITECTURE.md) and
 [frontend design](frontend/DESIGN.md) provide further detail.
 
 ## Important assumptions
@@ -238,7 +233,5 @@ volumes. Historical data must be synchronized explicitly before analytics are
 available. The current chart bundle triggers a non-blocking Vite size advisory;
 no deployment or public-service scaling is claimed.
 
-The final audit found an unresolved forecast-evolution presentation defect:
-some labels/captions retain the noon example, and the cutoff line is positioned
-at the selected publication rather than 09:20. API values are correct, but this
-view needs correction before unqualified submission. See [FINAL_AUDIT.md](FINAL_AUDIT.md).
+The evolution presentation findings in the historical final audit were fixed
+before cleanup. Current browser smoke results are in [CLEANUP_REPORT.md](CLEANUP_REPORT.md).

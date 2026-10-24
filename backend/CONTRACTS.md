@@ -22,8 +22,8 @@ directional percentages retain the bounded 0..100 `percentSchema`.
 Frontend may format MW as GW for presentation.
 
 JSON examples below illustrate response shapes, with shortened series and
-illustrative summary metrics. Captured January responses and measured metrics are
-in `tests/fixtures/api/`; the root `FINAL_AUDIT.md` records final live verification.
+illustrative summary metrics. The root `CLEANUP_REPORT.md` records current live
+verification; `FINAL_AUDIT.md` retains earlier measured January metrics.
 
 ---
 
@@ -385,12 +385,9 @@ When a public contract changes:
 
 1. update this file
 2. update backend Pydantic model
-3. update backend response tests
-4. update frontend Zod schema
-5. update frontend fixtures
-6. run both test suites
+3. update frontend Zod schema
+4. run static/build checks and smoke-check live responses and affected views
 
 Never change only one side.
 
-The Phase 6 WAPE correction was reconciled in Frontend Phase 4. Backend public
-models, frontend Zod schemas and tests now agree on nullable, unbounded WAPE.
+Backend public models and frontend Zod schemas agree on nullable, unbounded WAPE.

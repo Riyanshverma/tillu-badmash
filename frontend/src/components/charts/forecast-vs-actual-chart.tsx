@@ -129,7 +129,7 @@ export function ForecastVsActualChart({
         </div>
       </div>
 
-      <div className="w-full h-[320px] pt-4" data-testid="forecast-vs-actual-container">
+      <div className="w-full h-[320px] pt-4">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={chartData}
